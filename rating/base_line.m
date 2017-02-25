@@ -25,6 +25,7 @@ num_features = num_users + num_movies;
 % b = [b_1, b_2, b_3, b_4, b_5, b_a, b_b, b_c, b_d];
 Y = Y'(:);
 R = R'(:);
+valid_data_index = find(R==1)
 
 R.*Y
 sum(R.*Y)
@@ -57,9 +58,13 @@ A = [ U_1, M;
       U_4, M;
       U_5, M;];
 
-b = pinv(A'*A)*(A'*C)
-Y_predic = (A*b).+Y_average
-Y_final = (reshape(R_predic, num_movies, num_users))'
+% Remove non-valid entry from A and C
+A_valid = A(valid_data_index, :);
+C_valid = C(valid_data_index, :);
+
+b = pinv(A_valid'*A_valid)*(A_valid'*C_valid)
+Y_predic = (A*b).+Y_average;
+Y_final = (reshape(Y_predic, num_movies, num_users))'
 Y_answer = [4.4545, 4.6364, 4.2727, 5.0000,
             1.7273, 1.9091, 1.5455, 2.5455,
             2.5455, 2.7273, 2.3636, 3.3636,
