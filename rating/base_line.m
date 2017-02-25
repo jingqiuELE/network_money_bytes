@@ -64,13 +64,14 @@ C_valid = C(valid_data_index, :);
 
 b = pinv(A_valid'*A_valid)*(A_valid'*C_valid)
 Y_predic = (A*b).+Y_average;
+
+% Put the predictions into range [1,5]
+upper_bound = find(Y_predic>5)
+Y_predic(upper_bound) = 5
+
+lower_bound = find(Y_predic<1)
+Y_predic(lower_bound) = 1
+
 Y_final = (reshape(Y_predic, num_movies, num_users))'
-Y_answer = [4.4545, 4.6364, 4.2727, 5.0000,
-            1.7273, 1.9091, 1.5455, 2.5455,
-            2.5455, 2.7273, 2.3636, 3.3636,
-            3.0000, 3.1818, 2.8182, 3.8182,
-            3.0000, 3.1818, 2.8182, 3.8182]
 error_final = sum(R.*((Y_predic - Y).^2))
-Y_answer = Y_answer'(:)
-error_answer = sum(R.*((Y_answer - Y).^2))
 
