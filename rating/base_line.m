@@ -24,6 +24,7 @@ num_features = num_users + num_movies;
 % Fomula: b = inv(A'*A)*(A'C), whereas C = Y - Y_average,
 % b = [b_1, b_2, b_3, b_4, b_5, b_a, b_b, b_c, b_d];
 Y = Y'(:);
+R_orig = R;
 R = R'(:);
 valid_data_index = find(R==1);
 non_valid_data_index = find(R==0);
@@ -80,7 +81,7 @@ error_final = sum(R.*((Y_predic - Y).^2))
 % Neighbourhood prediction
 Error = Y - Y_predic;
 % Set the error of non valid data entry to be 0
-Error(non_valid_data_index) = 0;
+Error(non_valid_data_index) = 0 
 Error = (reshape(Error, num_movies, num_users))'
 
 for i = 1:num_movies
@@ -88,7 +89,10 @@ for i = 1:num_movies
         if i == j 
             distance(i,j) = 0;
         else 
-            distance(i,j) = calculateDistance(Error(:, i), Error(:, j));
+            left_row = find(R_orig(:, i) != 0);
+            right_row = find(R_orig(:, j) != 0); 
+            common_row = intersect(left_row, right_row);
+            distance(i,j) = calculateDistance(Error(common_row, i), Error(common_row, j));
         end
     end
 end
@@ -101,7 +105,6 @@ for i = 1:num_movies
    L(i, :) = index;
 end
 L
-% We use the top 2 neighbours to calculate similarities
 L = L(:, end-1:end)
 
 E_neighbour = [];
