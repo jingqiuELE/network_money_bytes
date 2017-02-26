@@ -25,12 +25,13 @@ num_features = num_users + num_movies;
 % b = [b_1, b_2, b_3, b_4, b_5, b_a, b_b, b_c, b_d];
 Y = Y'(:);
 R = R'(:);
-valid_data_index = find(R==1)
+valid_data_index = find(R==1);
+non_valid_data_index = find(R==0);
 
-R.*Y
-sum(R.*Y)
-Y_average = sum(R.*Y)/sum(R)
-C = R.*(Y.-Y_average)
+R.*Y;
+sum(R.*Y);
+Y_average = sum(R.*Y)/sum(R);
+C = R.*(Y.-Y_average);
 
 one = [1;
        1;
@@ -62,16 +63,65 @@ A = [ U_1, M;
 A_valid = A(valid_data_index, :);
 C_valid = C(valid_data_index, :);
 
-b = pinv(A_valid'*A_valid)*(A_valid'*C_valid)
+b = pinv(A_valid'*A_valid)*(A_valid'*C_valid);
 Y_predic = (A*b).+Y_average;
 
 % Put the predictions into range [1,5]
-upper_bound = find(Y_predic>5)
-Y_predic(upper_bound) = 5
+upper_bound = find(Y_predic>5);
+Y_predic(upper_bound) = 5;
 
-lower_bound = find(Y_predic<1)
-Y_predic(lower_bound) = 1
+lower_bound = find(Y_predic<1);
+Y_predic(lower_bound) = 1;
 
 Y_final = (reshape(Y_predic, num_movies, num_users))'
 error_final = sum(R.*((Y_predic - Y).^2))
 
+
+% Neighbourhood prediction
+Error = Y - Y_predic;
+% Set the error of non valid data entry to be 0
+Error(non_valid_data_index) = 0;
+Error = (reshape(Error, num_movies, num_users))'
+
+for i = 1:num_movies
+    for j = 1:num_movies
+        if i == j 
+            distance(i,j) = 0;
+        else 
+            distance(i,j) = calculateDistance(Error(:, i), Error(:, j));
+        end
+    end
+end
+
+distance
+
+L = [];
+for i = 1:num_movies
+   [s, index] = sort(abs(distance(:, i)));
+   L(i, :) = index;
+end
+L
+% We use the top 2 neighbours to calculate similarities
+L = L(:, end-1:end)
+
+E_neighbour = [];
+% Y_n = Y_predic + repmat(E_neighbour, num_users, 1). 
+for i=1:num_users
+    for j=1:num_movies
+        effective_d = distance(j, L(j, :));
+        effective_e = Error(i, L(j, :));
+        E_neighbour(i,j) = sum(effective_d.*effective_e)/sum(abs(effective_d));
+    end
+end
+E_neighbour
+Y_N = Y_final + E_neighbour;
+
+% Put the predictions into range [1,5]
+upper_bound = find(Y_N>5);
+Y_N(upper_bound) = 5;
+
+lower_bound = find(Y_N<1);
+Y_N(lower_bound) = 1
+
+Y_N_v = Y_N'(:);
+error_N = sum(R.*((Y_N_v -Y).^2))
