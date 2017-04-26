@@ -1,32 +1,19 @@
-%% Networks Money and Bytes, Homework 5
+%% contagion calculates the graph after specified iteration times.
+%% -------------Parameter----------------
+%% I: Initial state
+%% G: Graph
+%% p: Percentage of neighbours for a node to flip
+%% itimes: Iteration times
+%% -------------Return value-------------
+%% N: Updated state after itimes iteration.
+%% --------------------------------------
 
-%% Initialization
-clear; close all; clc
+function [N] = contagion(I, G, p, itimes)
+    T = (sum(G, 1) .- 1) * p;
 
-%% ===================Part 1: contagion model ==============
-
-% Graph description matrix
-G = [1, 1, 1, 0, 0, 0, 1, 0;
-     1, 1, 0, 1, 0, 0, 0, 1;
-     1, 0, 1, 1, 1, 1, 0, 0;
-     0, 1, 1, 1, 1, 1, 0, 0;
-     0, 0, 1, 1, 1, 1, 1, 0;
-     0, 0, 1, 1, 1, 1, 0, 1;
-     1, 0, 0, 0, 1, 0, 1, 1;
-     0, 1, 0, 0, 0, 1, 1, 1];
-
-% Percentage of neighbours for a node to flip
-P = 0.3;
-T = (size(G, 1) - 1) * P * ones(1, size(G, 1))
-
-% Initial state
-I = [1, 0, 0, 0, 0, 0, 0, 0];
-
-% Iteration steps
-itimes = 10;
-
-N = I;
-for i=1 : itimes
-    F = (N * G) >= T
-    N(F) = 1
+    N = I;
+    for i=1 : itimes
+        F = (N * G) >= T;
+        N(F) = 1;
+    end
 end

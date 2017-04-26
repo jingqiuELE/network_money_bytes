@@ -8,13 +8,13 @@ clear; close all; clc
 %% ===================Part 1: Iteration of DPC control ==============
 
 % gain matrix
-G = [1,   0.1,  0.3; 
-     0.2, 1,    0.3;
-     0.2, 0.2,   1 ];
+G = [1,   0.2,  0.1; 
+     0.2, 1,    0.2;
+     0.2, 0.3,   1 ];
 T = diag(G);
 noise = 0.1;
 % target SIR
-r = [1, 1.5, 1];
+r = [2, 2, 2.5];
 % Iteration steps
 itimes = 10;
 init_p = [1, 1, 1];
